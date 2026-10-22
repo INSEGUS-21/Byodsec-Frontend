@@ -11,12 +11,13 @@ export default function Home(){
         setError(null);
         const rawBody = '';
         try {
-            const response = await fetch('http://localhost:8443/api/v1/logout', {
+            const response = await fetch('https://localhost:8443/api/v1/logout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'authorization': `Bearer ${token}`,
                 },
+                credentials: 'include',
                 body: rawBody
             });
 

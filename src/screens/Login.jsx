@@ -46,6 +46,7 @@ export default function Login(){
 
           const res = await fetch(`${BASE_API}/login`, {
             method: "POST",
+            credentials: "include",
             headers: { 'Content-Type': 'application/json' },
             body: body
           });
