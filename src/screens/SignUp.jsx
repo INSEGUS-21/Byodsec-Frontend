@@ -1,13 +1,9 @@
 import { useState } from "react";
-
-
 import Alert from '@mui/material/Alert';
-import {sha256} from 'js-sha256';
 import { useNavigate } from "react-router-dom";
 
 
-const BASE_URL_API="http://localhost:8080/api/v1";
-const BASE_URL_API_RENDER="http://integridos-backend.onrender.com/api/v1";
+const BASE_URL_API="http://localhost:8080/api/v1/";
 
 
 function validatePassword(password) {
@@ -39,24 +35,9 @@ export default function SignUp(){
     const [username,setUsername]=useState("");
     const [password,setPassword]=useState("");
 
-    const [secretKey, setSecretkey]=useState("");
     const [error,setError]=useState("");
 
-    const toHex = (buffer) =>
-  [...new Uint8Array(buffer)].map((b) => b.toString(16).padStart(2, "0")).join("");
-
-    async function hmacHex(key, message) {
-  const enc = new TextEncoder();
-  const cryptoKey = await crypto.subtle.importKey(
-      "raw",
-      enc.encode(key),
-      { name: "HMAC", hash: "SHA-256" },
-      false,
-      ["sign"]
-    );
-    const signature = await crypto.subtle.sign("HMAC", cryptoKey, enc.encode(message));
-    return toHex(signature);
-    }
+    
 
     const handleSendForm=async ()=>{
         const { valid, errors } = validatePassword(password);
@@ -64,48 +45,25 @@ export default function SignUp(){
           setError(errors.join(". "));
           return; // no se envía nada al servidor
         }
-        let salt=toHex(crypto.getRandomValues(new Uint8Array(16)));
-        let passwordResume= password+salt;
-        for (let i=0; i<3; i++){
-          passwordResume= sha256(passwordResume);
-        }
 
-        const messageBody={"username":username,"password":passwordResume};
+        const messageBody={"username":username,"password":password};
         const data=JSON.stringify(messageBody);
-
-        let nonce=toHex(crypto.getRandomValues(new Uint8Array(32)));
-        let timestamp=Date.now()/1000;
-        
-
-        let hmac=await hmacHex(secretKey, `${timestamp}.${nonce}.${salt}.${data}`);
-
 
         try{
           let response=await fetch(BASE_URL_API+"/register",{method:'POST',
             body:data,
-            headers:{"Content-Type":"application/json", 
-              "nonce":nonce,
-              "timestamp":String(timestamp),
-              "hmac":hmac,
-              "salt": String(salt)}
+            headers:{"Content-Type":"application/json"}
             
           });
-          if(response.status===403) setError("Se ha detectado un problema de integridad, revisa la clave secreta porfavor");
           if(response.status===400) setError("Falta el nombre de usuario o la contraseña");
           if(response.status===409) setError("Ese nombre de usuario ya existe");
           if(response.status==201) {
             setError("");
             navigate("/");
-            
-
           }
         }catch(e){
-          
           setError("Ha ocurrido un error en el envío");
         }
-
-
-
       }
 
     
@@ -134,13 +92,6 @@ export default function SignUp(){
       La contraseña debe tener entre 8 y 128 caracteres e incluir una mayúscula,
       una minúscula, un número y un carácter especial.
       </Alert>
-
-      <div>
-        <label htmlFor="key">Clave Secreta</label>
-        <input id="key" type="password" onChange={(event)=>{
-          setSecretkey(event.target.value);
-        }}/>
-      </div>
 
       <div>
         <button onClick={()=>{handleSendForm()}}>Enviar</button>
