@@ -1,60 +1,86 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { sha256 } from 'js-sha256';
 
 
 export default function Login(){
   
-  const BASE_API= "http://localhost:8443/api/v1";
+  const BASE_API= "https://localhost:8443/api/v1";
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [secretKey, setSecretKey] = useState("");
 
 
-  async function login() {
+  const handleLogin = async (e) => {
+    e.preventDefault(); 
+        setError("");
 
-    //el hmac del body + clave
-    const body= JSON.stringify({ "username":username, "password": password });
-    
-    try{const res = await fetch(BASE_API+"/login", {method: "POST",
-                  headers: {'Content-Type': 'application/json'}, 
-                  body: body
-                }                  
-      );
+        if (!username || !password) {
+          setError("Por favor, introduce usuario y contraseña");
+          return;
+        }
 
-      if (!res.ok) {
-        setError("Usuario o contraseña incorrectos");
-        return;
-      }
+        const body = JSON.stringify({ username, password });
 
-      const data = await res.json(); //respuesta del backend al post que trae el token
-      console.log(data) //pa depurar  
-      localStorage.setItem("token", data.token);
-      navigate("/")
+        try {
+          await new Promise((resolve, reject) => {
+            const popup = window.open(
+              `${BASE_API}/auth-trigger`,
+              'mTLSPrompt',
+              'width=500,height=400'
+            );
 
+            if (!popup) {
+              reject(new Error("POPUP_BLOCKED"));
+              return;
+            }
 
-    }catch(err){
-      setError("No se pudo conectar con el servidor");
+            const checkClosed = setInterval(() => {
+              if (popup.closed) {
+                clearInterval(checkClosed);
+                resolve();
+              }
+            }, 300);
+          });
+          console.log("algo")
 
-    }
-  }
+          const res = await fetch(`${BASE_API}/login`, {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: body
+          });
 
+          if (!res.ok) {
+            if (res.status === 401) {
+              setError("Usuario o contraseña incorrectos, o certificado no autorizado");
+            } else {
+              setError("Error en la autenticación con el servidor");
+            }
+            return;
+          }
+
+          const data = await res.json();
+          localStorage.setItem("token", data.token);
+          navigate("/");
+
+        } catch (err) {
+          if (err.message === "POPUP_BLOCKED") {
+            setError("Por favor, permite las ventanas emergentes en tu navegador para seleccionar el certificado.");
+          } else {
+            setError("No se pudo conectar con el servidor o se canceló la selección de certificado.");
+          }
+        }
+      };
   return (   
       <>
       <h1>Login</h1>
-      <form>
-
-        <label htmlFor="secretKey">SecretKey:</label><br />
-        <input type="password" id="secretKey" name="secretKey" onChange = {(event) => setSecretKey(event.target.value)} /><br />
-      
+      <form onSubmit={handleLogin}>
         <label htmlFor="username">Username:</label><br />
         <input type="text" id="username" name="username" onChange = {(event) => setUsername(event.target.value)} /><br />
 
         <label htmlFor="password">Password:</label><br />
         <input type="password" id="password" name="password" onChange = {(event) => setPassword(event.target.value)} /><br />
-        <button type="button" onClick={login}>Entrar</button>
+        <button type="submit">Entrar</button>
 
         {error && <p style={{ color: "red" }}>{error}</p>}
       </form>

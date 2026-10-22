@@ -3,7 +3,7 @@ import Alert from '@mui/material/Alert';
 import { useNavigate } from "react-router-dom";
 
 
-const BASE_URL_API="http://localhost:8080/api/v1/";
+const BASE_URL_API="https://localhost:8080/api/v1";
 
 
 function validatePassword(password) {
@@ -59,6 +59,15 @@ export default function SignUp(){
           if(response.status===409) setError("Ese nombre de usuario ya existe");
           if(response.status==201) {
             setError("");
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.setAttribute('download', `${username}.p12`); 
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(downloadUrl);
             navigate("/");
           }
         }catch{

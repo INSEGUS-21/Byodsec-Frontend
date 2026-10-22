@@ -1,14 +1,16 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+
 export default function Home(){
+    const navigate = useNavigate();
+    const token = localStorage.getItem('token');
+    const [error,setError]=useState("");
+
     const handleLogout = async () => {
         setError(null);
-
-        if (!formData.key) { setError('Introduce la clave para cerrar sesión'); return; }
-
         const rawBody = '';
-
         try {
-
-            console.log("COSAAA")
             const response = await fetch('http://localhost:8443/api/v1/logout', {
                 method: 'POST',
                 headers: {
@@ -24,29 +26,24 @@ export default function Home(){
             } else {
                 setError('No se pudo cerrar la sesión (¿clave incorrecta?)');
             }
-        } catch (err) {
+        } catch {
             setError('No se pudo conectar con el servidor');
         }
     };
-    if (!token) return null;
-  
-  
-  
-  
-  
-  
-  
-  
-  return (
+    
+    
+    return (
       <>
       <h1>Home</h1>
       <a href="/login">Login</a>
       <a href="/sign-up">Register</a>
 
-      <button type="button" onClick={handleLogout}>
+      {token && <button type="button" onClick={handleLogout}>
                     Logout
-                </button>
+                </button>}
 
+    
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       </>
 
     )
