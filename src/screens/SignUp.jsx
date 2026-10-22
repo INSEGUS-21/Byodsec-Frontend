@@ -101,7 +101,4 @@ export default function SignUp(){
       {error && <Alert severity="error" variant="filled" >{error}</Alert>}
       </>)
 
-      
-
-      
 }
