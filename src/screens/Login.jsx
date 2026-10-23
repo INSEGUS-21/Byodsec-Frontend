@@ -53,6 +53,7 @@ export default function Login(){
           if (!res.ok) {
             if (res.status === 401) {
               setError("Usuario o contraseña incorrectos, o certificado no autorizado");
+            
             } else {
               setError("Error en la autenticación con el servidor");
             }
