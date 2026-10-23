@@ -42,7 +42,6 @@ export default function Login(){
               }
             }, 300);
           });
-          console.log("algo")
 
           const res = await fetch(`${BASE_API}/login`, {
             method: "POST",
