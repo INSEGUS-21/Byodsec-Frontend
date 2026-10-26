@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Revoke() {
@@ -7,6 +7,12 @@ export default function Revoke() {
     const [reason, setReason] = useState("");
     const [error, setError] = useState("");
 
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+        navigate("/", { replace: true });
+        }
+    }, [navigate]);
     const handleRevoke = async (e) => {
         e.preventDefault();
         setError("");

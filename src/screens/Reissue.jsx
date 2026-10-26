@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Reissue() {
@@ -10,6 +10,13 @@ export default function Reissue() {
     const [newUsername, setNewUsername] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+        navigate("/", { replace: true });
+        }
+    }, [navigate]);
 
     const handleReissue = async (e) => {
         e.preventDefault();

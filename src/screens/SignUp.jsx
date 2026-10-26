@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Alert from '@mui/material/Alert';
 import { useNavigate } from "react-router-dom";
 
@@ -37,7 +37,12 @@ export default function SignUp(){
 
     const [error,setError]=useState("");
 
-    
+    useEffect(() => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        navigate("/", { replace: true });
+      }
+    }, [navigate]);
 
     const handleSendForm=async ()=>{
         const { valid, errors } = validatePassword(password);

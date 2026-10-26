@@ -63,8 +63,8 @@ export default function Home(){
     return (
       <>
       <h1>Home</h1>
-      <a href="/login">Login</a>
-      <a href="/sign-up">Register</a>
+      {!token && <a href="/login">Login</a>}
+      {!token && <a href="/sign-up">Register</a>}
 
       {token && (
                 <div style={{ marginBottom: '20px' }}><button type="button" onClick={handleLogout}>
