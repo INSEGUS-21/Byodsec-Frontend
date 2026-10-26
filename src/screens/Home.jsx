@@ -13,7 +13,6 @@ export default function Home(){
         e.preventDefault();
         setError(null);
         setreply("");
-        const rawBody = message;
         try{
             const response = await fetch('https://localhost:8443/messages', {
                 method: 'POST',
@@ -67,9 +66,18 @@ export default function Home(){
       <a href="/login">Login</a>
       <a href="/sign-up">Register</a>
 
-      {token && <button type="button" onClick={handleLogout}>
+      {token && (
+                <div style={{ marginBottom: '20px' }}><button type="button" onClick={handleLogout}>
                     Logout
-                </button>}
+                </button>
+                <button type="button" onClick={() => navigate('/reissue')} style={{ marginLeft: '10px' }}>
+                    Reemitir Identidad / Certificado
+                </button>
+                <button type="button" onClick={() => navigate('/revoke')} style={{ marginLeft: '10px', color: 'red' }}>
+                    Revocar Certificado
+                </button>
+                </div>
+            )}
 
       {token && <form onSubmit={handleMessage}>
         <label htmlFor="message">Mensaje:</label><br />
